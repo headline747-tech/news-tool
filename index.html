@@ -85,7 +85,7 @@ body{overflow-x:hidden}
   <span id="saved" style="font-size:13px;opacity:.85"></span>
   <button class="btn" id="fz" title="ফোকাস মোড (Esc দিয়ে বের হন)">🎯 ফোকাস</button><button class="btn" id="theme" title="থিম">🌓</button>
   <button class="btn" id="save">সংরক্ষণ</button>
-  <button class="btn" id="cfgb">⚙ সংযোগ</button><button class="btn" id="copyb">HTML কপি</button><button class="btn pri" id="pubb">Blogger-এ পাঠান</button>
+  <button class="btn" id="lgn" title="পপআপ ছাড়া Google লগইন">🔑 লগইন</button><button class="btn" id="cfgb">⚙ সংযোগ</button><button class="btn" id="copyb">HTML কপি</button><button class="btn pri" id="pubb">Blogger-এ পাঠান</button>
 </div>
 <div class="wrap">
   <aside class="card" style="align-self:start">
@@ -243,7 +243,11 @@ const auth=()=>new Promise((ok,no)=>{if(tok&&Date.now()<tokExp)return ok(tok);
  if(!window.google||!cfg.cid)return no(new Error('Client ID দিন এবং http(s) ঠিকানা থেকে খুলুন'));
  google.accounts.oauth2.initTokenClient({client_id:cfg.cid,scope:'https://www.googleapis.com/auth/blogger',
  callback:r=>{if(r.error)return no(new Error(r.error_description||r.error));tok=r.access_token;tokExp=Date.now()+(r.expires_in-60)*1000;ok(tok)},
- error_callback:e=>no(new Error(e&&e.type==='popup_failed_to_open'?'পপআপ ব্লক হয়েছে — ঠিকানা বারের পপআপ আইকন থেকে Allow করুন':e&&e.type==='popup_closed'?'লগইন উইন্ডো বন্ধ হয়ে গেছে (উইন্ডোতে কী এরর ছিল দেখুন)':'লগইন ব্যর্থ: '+((e&&e.type)||'অজানা')))}).requestAccessToken()});
+ error_callback:e=>{if(e&&e.type==='popup_failed_to_open')setTimeout(()=>{if(confirm('পপআপ ব্লক হয়েছে। পপআপ ছাড়া (পেজ বদলে) লগইন করবেন?'))rlogin()},50);no(new Error(e&&e.type==='popup_failed_to_open'?'পপআপ ব্লক হয়েছে — ঠিকানা বারের পপআপ আইকন থেকে Allow করুন':e&&e.type==='popup_closed'?'লগইন উইন্ডো বন্ধ হয়ে গেছে (উইন্ডোতে কী এরর ছিল দেখুন)':'লগইন ব্যর্থ: '+((e&&e.type)||'অজানা')))}}).requestAccessToken()});
+function rlogin(){if(!cfg.cid){fillCfg();$('#cfg').classList.remove('hide');return toast('আগে Client ID দিন')}
+ try{pull();store()}catch(e){}
+ location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:cfg.cid,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/blogger',include_granted_scopes:'true',prompt:'select_account'})}
+$('#lgn').onclick=rlogin;
 async function api(path,method,body){const t=await auth();
  const r=await fetch('https://www.googleapis.com/blogger/v3/blogs/'+cfg.bid+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
  const j=await r.json();if(!r.ok)throw new Error(j.error&&j.error.message||r.status);return j}
@@ -303,6 +307,7 @@ $('#fz').onclick=()=>document.body.classList.toggle('fz');
 const fsz=d=>{const e=$('#ed');e.style.fontSize=Math.min(28,Math.max(14,parseInt(getComputedStyle(e).fontSize)+d))+'px'};
 $('#fm').onclick=()=>fsz(-2);$('#fp').onclick=()=>fsz(2);
 addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remove('fz');if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('#lnk').click()}if((e.ctrlKey||e.metaKey)&&e.key==='f'&&document.activeElement&&$('#ed').contains(document.activeElement)){e.preventDefault();$('#frb').click()}});
+(function(){const h=new URLSearchParams(location.hash.slice(1));if(h.get('access_token')){tok=h.get('access_token');tokExp=Date.now()+((+h.get('expires_in')||3600)-60)*1000;history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>toast('লগইন সফল ✓ এবার “Blogger-এ পাঠান” চাপুন',4000),400)}})();
 load();posts.length?open(posts.sort((a,b)=>b.t-a.t)[0].id):newPost();
 </script>
 </body>
