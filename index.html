@@ -185,7 +185,7 @@ function push(){const p=get();if(!p)return;
 function meta(){chk();chips();const txt=$('#ed').innerText.trim(),w=txt?txt.split(/\s+/).length:0;
   $('#wc').textContent=bn(w)+' শব্দ · '+bn(txt.length)+' অক্ষর · ~'+bn(Math.max(1,Math.round(w/200)))+' মিনিট পড়া';
   $('#dsn').textContent=bn($('#ds').value.length)+'/১৫০';
-  const tl=$('#title').value.trim().length,tc=$('#tcn');tc.textContent=bn(tl)+' অক্ষর'+(tl>70?' — বেশি লম্বা':tl>=20?' — ভালো':'');tc.style.color=tl>70?'var(--rd)':tl>=20?'#34a853':'var(--mu)';
+  const tl=$('#title').value.trim().length,tc=$('#tcn');tc.textContent=bn(tl)+' অক্ষর'+(tl>100?' — বেশি লম্বা':tl>=20?' — ভালো':'');tc.style.color=tl>100?'var(--rd)':tl>=20?'#34a853':'var(--mu)';
   const im=$('#im').value.trim();$('#imp').innerHTML=im?`<img src="${esc(im)}" alt="">`:'';seo()}
 function seo(){const p=get()||{},t=$('#title').value.trim(),d=$('#ds').value.trim();let u='আপনার-ব্লগ.blogspot.com';try{if(p.url)u=new URL(p.url).host}catch(e){}
   $('#sp').innerHTML=`<div style="color:var(--mu);font-size:12px">${esc(u)}</div><div style="color:var(--bl);font-size:16px;line-height:1.35">${esc(t.slice(0,60)||'শিরোনাম এখানে')}${t.length>60?'…':''}</div><div style="font-size:13px;color:var(--mu)">${esc(d||'সার্চ ডেসক্রিপশন এখানে দেখাবে')}</div>`}
@@ -248,6 +248,13 @@ function rlogin(){if(!cfg.cid){fillCfg();$('#cfg').classList.remove('hide');retu
  try{pull();store()}catch(e){}
  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:cfg.cid,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/blogger',include_granted_scopes:'true',prompt:'select_account'})}
 $('#lgn').onclick=rlogin;
+const shrinkSrc=src=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1200/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.82))};im.onerror=()=>no(new Error('ছবি পড়া যায়নি'));im.src=src});
+async function toImgbb(d){const fd=new FormData();fd.append('image',d.split(',')[1]);const r=await fetch('https://api.imgbb.com/1/upload?key='+cfg.ik,{method:'POST',body:fd}),j=await r.json();if(!j.success)throw new Error(j.error&&j.error.message||'ImgBB আপলোড ব্যর্থ');return j.data.url}
+async function fixEd(){const ims=[...$('#ed').querySelectorAll('img[src^="data:"]')],f=$('#im').value.trim().startsWith('data:');
+ if(!ims.length&&!f)return;if(!cfg.ik)throw new Error('লেখায় এম্বেড ছবি আছে। আগে ⚙ সংযোগ-এ ImgBB key দিন');
+ let n=0;for(const i of ims){n++;toast('ছবি আপলোড হচ্ছে… '+bn(n)+'/'+bn(ims.length+(f?1:0)),8000);i.src=await toImgbb(await shrinkSrc(i.src))}
+ if(f)$('#im').value=await toImgbb(await shrinkSrc($('#im').value.trim()));
+ pull();store();meta()}
 async function api(path,method,body){const t=await auth();
  const r=await fetch('https://www.googleapis.com/blogger/v3/blogs/'+cfg.bid+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
  const j=await r.json();if(!r.ok)throw new Error(j.error&&j.error.message||r.status);return j}
@@ -256,7 +263,7 @@ $('#pubb').onclick=async()=>{pull();const p=get();
  if(!p.title.trim())return toast('শিরোনাম লিখুন');
  if(p.st==='pub'&&window.score<3&&!confirm('প্রকাশের প্রস্তুতি অসম্পূর্ণ। তবুও লাইভ করবেন?'))return;
  const b=$('#pubb');b.disabled=true;b.textContent='পাঠানো হচ্ছে…';
- try{const labels=[p.cat,...p.lb.split(',').map(x=>x.trim()).filter(Boolean)].filter((v,i,a)=>v&&a.indexOf(v)===i);
+ try{await auth();await fixEd();const labels=[p.cat,...p.lb.split(',').map(x=>x.trim()).filter(Boolean)].filter((v,i,a)=>v&&a.indexOf(v)===i);
   let h=final();if(p.im&&!h.includes(p.im))h=`<div class="separator" style="text-align:center"><img src="${esc(p.im)}" alt="${esc(p.title)}" style="max-width:100%"></div>`+h;
   const live=p.st==='pub',body={kind:'blogger#post',title:p.title,content:h,labels};if(p.sc)body.published=new Date(p.sc).toISOString();let r;
   if(p.bid){r=await api('/posts/'+p.bid,'PATCH',body);if(live&&!p.live)r=await api('/posts/'+p.bid+'/publish','POST')}
@@ -268,7 +275,7 @@ const shrink=f=>new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL
  im.onload=()=>{const k=Math.min(1,1200/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.82))};
  im.onerror=()=>no(new Error('ছবি পড়া যায়নি'));im.src=u});
 async function upImg(f){toast('ছবি প্রস্তুত হচ্ছে…',6000);const d=await shrink(f);
- if(!cfg.ik){toast('ImgBB key নেই: ছবি পোস্টের ভেতরেই এম্বেড হলো (ফাইল ভারী হবে)',4000);return d}
+ if(!cfg.ik)throw new Error('আগে ⚙ সংযোগ-এ ImgBB key দিন')
  const fd=new FormData();fd.append('image',d.split(',')[1]);
  const r=await fetch('https://api.imgbb.com/1/upload?key='+cfg.ik,{method:'POST',body:fd}),j=await r.json();
  if(!j.success)throw new Error(j.error&&j.error.message||'আপলোড ব্যর্থ');toast('ছবি আপলোড হয়েছে ✓');return j.data.url}
@@ -280,7 +287,7 @@ $('#imf2').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)
 let flt='all';
 const BASE=['সিলেটের খবর','জাতীয়','আন্তর্জাতিক','রাজনীতি','ইসলামী দাওয়াহ','খেলাধুলা','বিনোদন','অন্যান্য'];
 function chk(){const t=$('#title').value.trim().length,w=($('#ed').innerText.trim().match(/\S+/g)||[]).length,d=$('#ds').value.trim().length;
- const it=[[t>=20&&t<=70,`শিরোনাম ২০–৭০ অক্ষর (এখন ${bn(t)})`],[w>=100,`কমপক্ষে ১০০ শব্দ (এখন ${bn(w)})`],[!!$('#im').value.trim(),'ফিচার্ড ছবি'],[d>=50,`সার্চ ডেসক্রিপশন ৫০+ অক্ষর (এখন ${bn(d)})`],[!!$('#au').value.trim(),'লেখকের নাম']];
+ const it=[[t>=20&&t<=100,`শিরোনাম ২০–১০০ অক্ষর (এখন ${bn(t)})`],[w>=100,`কমপক্ষে ১০০ শব্দ (এখন ${bn(w)})`],[!!$('#im').value.trim(),'ফিচার্ড ছবি'],[d>=50,`সার্চ ডেসক্রিপশন ৫০+ অক্ষর (এখন ${bn(d)})`],[!!$('#au').value.trim(),'লেখকের নাম']];
  const n=window.score=it.filter(x=>x[0]).length;
  $('#chk').innerHTML=`<div style="height:6px;background:var(--bd);border-radius:3px;overflow:hidden"><div style="width:${n*20}%;height:100%;background:${n>=4?'#34a853':n>=2?'#f9ab00':'#b71c1c'}"></div></div><ul style="list-style:none;padding:0;margin:8px 0 0;font-size:13px">${it.map(x=>`<li style="color:${x[0]?'#34a853':'var(--mu)'}">${x[0]?'✔':'○'} ${x[1]}</li>`).join('')}</ul>`}
 function chips(){const cu=$('#lb').value.split(',').map(x=>x.trim()).filter(Boolean),c=$('#cat').value;
