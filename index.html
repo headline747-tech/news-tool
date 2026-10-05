@@ -1,321 +1,50 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>পোস্ট ড্যাশবোর্ড</title>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f1f1f1;--card:#fff;--tx:#1a1a1a;--mu:#777;--bd:#e3e3e3;--rd:#b71c1c;--bl:#1a73e8;--soft:#faf3f3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121212;--card:#1e1e1e;--tx:#eee;--mu:#9a9a9a;--bd:#333;--rd:#ff6659;--bl:#7ab0ff;--soft:#2a1d1d}}
-:root[data-theme="dark"]{--bg:#121212;--card:#1e1e1e;--tx:#eee;--mu:#9a9a9a;--bd:#333;--rd:#ff6659;--bl:#7ab0ff;--soft:#2a1d1d}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 'Hind Siliguri',Arial,sans-serif}
-button,input,select,textarea{font:inherit;color:inherit}
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:#b71c1c;color:#fff;display:flex;align-items:center;gap:10px;padding:8px 14px;flex-wrap:wrap}
-.top h1{font-size:18px;margin:0;flex:1;font-weight:700}
-.btn{border:1px solid var(--bd);background:var(--card);border-radius:5px;padding:5px 12px;cursor:pointer;font-weight:600}
-.btn:hover{border-color:var(--rd)}.btn.pri{background:var(--rd);color:#fff;border-color:var(--rd)}
-.top .btn{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)}
-.top .btn.pri{background:#fff;color:#b71c1c}
-.wrap{display:grid;grid-template-columns:250px minmax(0,1fr) 270px;gap:14px;max-width:1500px;margin:0 auto;padding:14px}
-@media(max-width:1000px){.wrap{grid-template-columns:minmax(0,1fr)}}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px}
-.card h3{margin:0 0 8px;font-size:14px;color:var(--mu);font-weight:600}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:10px}
-.stats b{display:block;font-size:20px;color:var(--rd)}.stats span{font-size:12px;color:var(--mu)}
-.plist{max-height:420px;overflow:auto;margin:8px 0 0;padding:0;list-style:none}
-.plist li{padding:8px;border-radius:6px;cursor:pointer;border:1px solid transparent}
-.plist li:hover{background:var(--soft)}.plist li.on{background:var(--soft);border-color:var(--rd)}
-.plist small{color:var(--mu);display:flex;justify-content:space-between}
-.tag{font-size:11px;padding:1px 7px;border-radius:9px;background:#e8f0fe;color:#1a56b8}.tag.pub{background:#e6f4ea;color:#137333}
-.tabs{display:flex;gap:4px;margin-bottom:8px}.tabs .btn.on{background:var(--rd);color:#fff;border-color:var(--rd)}
-.tb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);position:sticky;top:calc(env(safe-area-inset-top,0px) + 52px);z-index:3}
-.tb button,.tb select{height:30px;min-width:30px;border:1px solid var(--bd);background:var(--card);border-radius:4px;cursor:pointer;padding:0 6px}
-.tb button:hover{background:var(--soft)}.tb .sep{width:1px;height:22px;background:var(--bd);margin:0 3px}
-.tb input[type=color]{width:30px;height:30px;padding:1px;border:1px solid var(--bd);background:var(--card);border-radius:4px}
-#title{width:100%;font:800 26px/1.4 'Hind Siliguri';border:0;border-bottom:2px dashed var(--bd);background:transparent;padding:10px 2px;margin-top:10px;outline:0}
-#title:focus{border-color:var(--rd)}
-#ed{min-height:420px;margin-top:10px;padding:14px 4px;outline:0;font-size:18px;line-height:1.9;overflow-wrap:anywhere}
-#ed img{max-width:100%;height:auto}#ed:empty:before{content:attr(data-ph);color:var(--mu)}
-#ed blockquote,.pv blockquote{border-left:4px solid var(--rd);margin:12px 0;padding:4px 14px;background:var(--soft)}
-#ed a,.pv a{color:var(--bl)}
-.foot{display:flex;justify-content:space-between;color:var(--mu);font-size:13px;border-top:1px solid var(--bd);padding-top:8px}
-label{display:block;font-size:13px;color:var(--mu);margin:10px 0 3px}
-.f{width:100%;padding:6px 8px;border:1px solid var(--bd);border-radius:5px;background:var(--card)}
-textarea.f{resize:vertical;min-height:70px}
-.pv{max-width:760px;margin:0 auto}
-.pv .hd{display:flex;justify-content:space-between;gap:12px}.pv .cat{color:var(--bl);font-weight:700;white-space:nowrap;margin-top:4px}
-.pv h2{font-size:26px;font-weight:800;line-height:1.35;margin:0}
-.pv .by{display:flex;align-items:center;gap:10px;padding:12px 0;margin:10px 0 18px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-size:14px}
-.pv .av{width:32px;height:32px;border-radius:50%;background:#b71c1c;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
-.pv .bd{font-size:18px;line-height:1.9}.pv img{max-width:100%;height:auto}
-#htm{width:100%;min-height:460px;font:13px/1.5 monospace;direction:ltr}
-.hide{display:none}
-.modal{position:fixed;inset:0;background:#0008;z-index:10;display:flex;align-items:center;justify-content:center;padding:14px}.modal.hide{display:none}
-.flt{display:flex;gap:4px;margin-top:8px}.flt .btn{flex:1;padding:2px 4px;font-size:13px}.flt .btn.on{background:var(--rd);color:#fff;border-color:var(--rd)}
-.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.chips span{font-size:12px;padding:1px 8px;border:1px solid var(--bd);border-radius:12px;cursor:pointer}.chips span:hover{background:var(--soft);border-color:var(--rd)}
-.pv.m{max-width:380px;border:1px solid var(--bd);border-radius:16px;padding:14px}.pv.m h2{font-size:22px}.pv.m .bd{font-size:17px}
-@media(max-width:700px){.tb{flex-wrap:nowrap;overflow-x:auto}}
-#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
-#toast.on{opacity:1}
-
-.top{background:linear-gradient(90deg,#8e1414,#b71c1c);box-shadow:0 2px 8px #0003}
-.btn{border-radius:8px;padding:6px 12px;transition:background .15s,border-color .15s}
-.card{border-radius:12px}
-:focus-visible{outline:2px solid var(--bl);outline-offset:2px}
-#ed ::selection,#ed::selection{background:#1a56db;color:#fff}
-.th{width:44px;height:44px;object-fit:cover;border-radius:6px;flex:none}
-.tt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600;line-height:1.4}
-.cn{font-size:12px;text-align:right;color:var(--mu);margin-top:2px}
-.sp{margin-top:8px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
-#imp img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-top:6px}
-#ed table{border-collapse:collapse;width:100%}#ed td{padding:6px;border:1px solid var(--bd)}#ed iframe{max-width:100%}
-.btn.sm{padding:0 8px;height:26px;font-size:13px}
-body.fz .wrap{grid-template-columns:minmax(0,860px);justify-content:center}body.fz .wrap>aside{display:none}
-@media(max-width:1000px){.wrap>main{order:-1}.wrap{padding:8px}.wrap>*{min-width:0}}
-body{overflow-x:hidden}
-@media(max-width:700px){.top{flex-wrap:nowrap;overflow-x:auto}.top h1{font-size:16px;white-space:nowrap}.top .btn,#saved{white-space:nowrap}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0D9488" />
+<meta name="description" content="সমাজসেবী — এলাকার সেবায় সবার সঙ্গী" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>সমাজসেবী</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="top">
-  <h1>📰 পোস্ট ড্যাশবোর্ড</h1>
-  <span id="saved" style="font-size:13px;opacity:.85"></span>
-  <button class="btn" id="fz" title="ফোকাস মোড (Esc দিয়ে বের হন)">🎯 ফোকাস</button><button class="btn" id="theme" title="থিম">🌓</button>
-  <button class="btn" id="save">সংরক্ষণ</button>
-  <button class="btn" id="lgn" title="পপআপ ছাড়া Google লগইন">🔑 লগইন</button><button class="btn" id="cfgb">⚙ সংযোগ</button><button class="btn" id="copyb">HTML কপি</button><button class="btn pri" id="pubb">Blogger-এ পাঠান</button>
-</div>
-<div class="wrap">
-  <aside class="card" style="align-self:start">
-    <div class="stats"><div><b id="sAll">০</b><span>মোট</span></div><div><b id="sPub">০</b><span>প্রকাশিত</span></div><div><b id="sDr">০</b><span>খসড়া</span></div></div>
-    <button class="btn pri" id="newp" style="width:100%">＋ নতুন পোস্ট</button><div style="display:flex;gap:4px;margin-top:6px"><button class="btn" id="dup" style="flex:1;padding:4px">⧉ কপি</button><button class="btn" id="bk" style="flex:1;padding:4px">⬇ ব্যাকআপ</button><button class="btn" id="rs" style="flex:1;padding:4px">⬆ রিস্টোর</button></div><input type="file" id="rsf" accept=".json" hidden>
-    <input class="f" id="q" placeholder="পোস্ট খুঁজুন…" style="margin-top:8px"><div class="flt"><button class="btn on" data-f="all">সব</button><button class="btn" data-f="draft">খসড়া</button><button class="btn" data-f="pub">প্রকাশিত</button></div>
-    <ul class="plist" id="plist"></ul>
-  </aside>
+  <div id="app">
+    <!-- Top Navigation Bar -->
+    <header id="topbar" class="hidden">
+      <button id="backBtn" class="icon-btn hidden" aria-label="ফিরে যান">←</button>
+      <h1 id="topTitle">সমাজসেবী</h1>
+      <button id="installBtn" class="icon-btn hidden" aria-label="ইনস্টল">⬇</button>
+    </header>
 
-  <main class="card">
-    <div class="tabs">
-      <button class="btn on" data-t="edit">✏️ এডিটর</button>
-      <button class="btn" data-t="prev">👁 প্রিভিউ</button>
-      <button class="btn" data-t="html">&lt;/&gt; HTML</button>
-    </div>
-    <div id="p-edit">
-      <div class="tb" id="tb">
-        <button data-c="undo" title="আনডু">↶</button><button data-c="redo" title="রিডু">↷</button><span class="sep"></span>
-        <select id="blk"><option value="p">অনুচ্ছেদ</option><option value="h2">শিরোনাম ২</option><option value="h3">শিরোনাম ৩</option><option value="h4">শিরোনাম ৪</option><option value="blockquote">উদ্ধৃতি</option></select>
-        <select id="fn"><option value="">ফন্ট</option><option>Hind Siliguri</option><option>Noto Serif Bengali</option><option>Arial</option><option>Georgia</option><option>Courier New</option></select>
-        <select id="fs"><option value="">সাইজ</option><option value="1">খুব ছোট</option><option value="2">ছোট</option><option value="3">সাধারণ</option><option value="5">বড়</option><option value="6">আরও বড়</option><option value="7">বিশাল</option></select>
-        <span class="sep"></span>
-        <button data-c="bold"><b>B</b></button><button data-c="italic"><i>I</i></button><button data-c="underline"><u>U</u></button><button data-c="strikeThrough"><s>S</s></button>
-        <input type="color" id="fc" value="#b71c1c" title="লেখার রং"><input type="color" id="bc" value="#fff176" title="হাইলাইট">
-        <span class="sep"></span>
-        <button data-c="justifyLeft">⇤</button><button data-c="justifyCenter">↔</button><button data-c="justifyRight">⇥</button><button data-c="justifyFull">☰</button>
-        <span class="sep"></span>
-        <button data-c="insertUnorderedList">• তালিকা</button><button data-c="insertOrderedList">১. তালিকা</button><button data-c="outdent">⇠</button><button data-c="indent">⇢</button>
-        <span class="sep"></span>
-        <button data-c="superscript" title="সুপারস্ক্রিপ্ট">x²</button><button data-c="subscript" title="সাবস্ক্রিপ্ট">x₂</button>
-        <select id="lh" title="লাইন স্পেসিং"><option value="">লাইন</option><option value="1">১.০</option><option value="1.5">১.৫</option><option value="2">২.০</option><option value="2.5">২.৫</option></select>
-        <span class="sep"></span>
-        <button id="lnk" title="লিংক (Ctrl+K)">🔗</button><button id="img" title="ছবি আপলোড">🖼</button><button id="imu" title="ছবির লিংক">🌐</button><button data-c="insertHorizontalRule">―</button><button id="frb" title="খুঁজুন ও বদলান (Ctrl+F)">🔍</button><select id="qi"><option value="">＋ ঢোকান</option><option value="dl">ডেটলাইন</option><option value="cap">ছবির ক্যাপশন</option><option value="pq">পুল-কোট</option><option value="rm">আরও পড়ুন বক্স</option><option value="src">সূত্র লাইন</option><option value="en">সম্পাদকের নোট</option><option value="tbl">টেবিল</option><option value="yt">ইউটিউব ভিডিও</option></select><button data-c="removeFormat" title="ফরম্যাট মুছুন">Tx</button>
-      </div>
-      <input id="title" placeholder="সংবাদের শিরোনাম লিখুন…"><div class="cn" id="tcn"></div>
-      <div id="ed" contenteditable="true" data-ph="এখানে লিখুন… (Word/Docs থেকে পেস্ট করলে বাড়তি ফরম্যাট নিজে থেকেই পরিষ্কার হবে)"></div>
-      <div class="foot"><span id="wc"></span><span><button class="btn sm" id="fm" title="লেখা ছোট">A−</button> <button class="btn sm" id="fp" title="লেখা বড়">A+</button></span></div>
-    </div>
-    <div id="p-prev" class="hide"><div style="text-align:center;margin-bottom:8px"><button class="btn" id="dev">📱 মোবাইল</button></div><div class="pv" id="pv"></div></div>
-    <div id="p-html" class="hide">
-      <textarea id="htm" readonly></textarea>
-      <p style="color:var(--mu);font-size:13px">Blogger-এ নতুন পোস্ট → উপরে বাঁ দিকের কলম আইকন → <b>HTML view</b> → পেস্ট করুন। শিরোনাম আলাদা ঘরে বসান।</p>
-    </div>
-  </main>
+    <!-- Main Content Area -->
+    <main id="main"></main>
 
-  <aside class="card" style="align-self:start">
-    <h3>প্রকাশের প্রস্তুতি</h3><div id="chk"></div><hr style="border:0;border-top:1px solid var(--bd);margin:14px 0 10px"><h3>পোস্ট সেটিংস</h3>
-    <label>অবস্থা</label>
-    <select class="f" id="st"><option value="draft">খসড়া</option><option value="pub">প্রকাশিত (লাইভ)</option></select>
-    <label>প্রকাশের সময় (ঐচ্ছিক, খালি রাখলে এখনই)</label><input type="datetime-local" class="f" id="sc">
-    <label>ক্যাটাগরি (থিমে শিরোনামের পাশে দেখায়)</label>
-    <select class="f" id="cat"><option>সিলেটের খবর</option><option>জাতীয়</option><option>আন্তর্জাতিক</option><option>রাজনীতি</option><option>ইসলামী দাওয়াহ</option><option>খেলাধুলা</option><option>বিনোদন</option><option>অন্যান্য</option></select>
-    <label>অতিরিক্ত লেবেল (কমা দিয়ে)</label>
-    <input class="f" id="lb" placeholder="যেমন: বন্যা, ঢাকা"><div class="chips" id="chips"></div>
-    <label>সার্চ ডেসক্রিপশন (SEO) <a href="#" id="gd" style="float:right;color:var(--bl)">✨ লেখা থেকে তৈরি</a></label>
-    <textarea class="f" id="ds" maxlength="150" placeholder="১৫০ অক্ষরের মধ্যে"></textarea>
-    <small id="dsn" style="color:var(--mu)"></small><div class="sp" id="sp"></div>
-    <label>ফিচার্ড ছবির লিংক</label>
-    <input class="f" id="im" placeholder="https://… বা আপলোড করুন"><button class="btn" id="imb" style="margin-top:6px;width:100%">⬆ ছবি আপলোড</button><div id="imp"></div>
-    <label>লেখক</label>
-    <input class="f" id="au" placeholder="প্রতিবেদকের নাম">
-    <div id="out" style="margin-top:10px;font-size:13px"></div><button class="btn" id="del" style="margin-top:14px;width:100%;color:var(--rd)">🗑 পোস্ট মুছুন</button>
-  </aside>
-</div>
-<input type="file" id="imf" accept="image/*" hidden><input type="file" id="imf2" accept="image/*" hidden>
-<div id="cfg" class="modal hide"><div class="card" style="max-width:520px;width:100%;max-height:90%;overflow:auto">
-<h3>Blogger সংযোগ</h3>
-<label>Google OAuth Client ID</label><input class="f" id="cid" placeholder="xxxx.apps.googleusercontent.com">
-<label>Blog ID (Blogger ড্যাশবোর্ডের URL-এ blogID=… এর সংখ্যা)</label><input class="f" id="bid" placeholder="1234567890123456789">
-<label>ImgBB API key (ছবি আপলোডের জন্য, ঐচ্ছিক)</label><input class="f" id="ik" placeholder="api.imgbb.com থেকে বিনামূল্যে">
-<ol style="font-size:13px;color:var(--mu);padding-left:18px">
-<li>console.cloud.google.com-এ প্রজেক্ট খুলে <b>Blogger API v3</b> চালু করুন।</li>
-<li>OAuth consent screen-এ Test users-এ আপনার Gmail যোগ করুন।</li>
-<li>Credentials → OAuth client ID (Web application) → Authorized JavaScript origins-এ যে ঠিকানা থেকে ফাইল খুলবেন সেটি দিন (যেমন http://localhost:8000)।</li>
-<li>file:// থেকে খুললে Google লগইন চলবে না; হোস্ট করুন বা localhost সার্ভারে চালান।</li></ol>
-<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="cfgx">বন্ধ</button><button class="btn pri" id="cfgs">সংরক্ষণ</button></div></div></div>
-<div id="toast"></div>
+    <!-- Bottom Navigation Bar -->
+    <nav id="bottomnav" class="hidden">
+      <button data-nav="home" class="nav-btn">🏠<span>হোম</span></button>
+      <button data-nav="myactivity" class="nav-btn">📋<span>আমার কাজ</span></button>
+      <button data-nav="create" class="nav-btn nav-create">＋</button>
+      <button data-nav="leaderboard" class="nav-btn">🏆<span>সেরা</span></button>
+      <button data-nav="profile" class="nav-btn">👤<span>প্রোফাইল</span></button>
+    </nav>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const bn=n=>Number(n).toLocaleString('bn-BD');
-let posts=[],cur=null,mem=null;
-const KEY='nd_posts_v1';
-function load(){try{const r=localStorage.getItem(KEY);posts=r?JSON.parse(r):[]}catch(e){posts=mem||[]}}
-function store(){try{localStorage.setItem(KEY,JSON.stringify(posts))}catch(e){mem=posts}
-  $('#saved').textContent='✓ সংরক্ষিত '+new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'})}
-const mk=()=>({id:'p'+Date.now(),title:'',body:'',cat:'সিলেটের খবর',lb:'',ds:'',im:'',au:(()=>{try{return localStorage.getItem('nd_au')||''}catch(e){return ''}})(),st:'draft',sc:'',t:Date.now()});
-const get=()=>posts.find(p=>p.id===cur);
-function toast(m,ms=1800){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),ms)}
-function pull(){const p=get();if(!p)return;
-  p.title=$('#title').value;p.body=$('#ed').innerHTML;p.cat=$('#cat').value;p.lb=$('#lb').value;
-  p.ds=$('#ds').value;p.im=$('#im').value;p.au=$('#au').value;p.st=$('#st').value;p.sc=$('#sc').value;p.t=Date.now()}
-function push(){const p=get();if(!p)return;
-  $('#title').value=p.title;$('#ed').innerHTML=p.body;$('#cat').value=p.cat;$('#lb').value=p.lb;
-  $('#ds').value=p.ds;$('#im').value=p.im;$('#au').value=p.au;$('#st').value=p.st;$('#sc').value=p.sc||'';$('#out').innerHTML=p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">Blogger-এ দেখুন ↗</a>`:'';meta()}
-function meta(){chk();chips();const txt=$('#ed').innerText.trim(),w=txt?txt.split(/\s+/).length:0;
-  $('#wc').textContent=bn(w)+' শব্দ · '+bn(txt.length)+' অক্ষর · ~'+bn(Math.max(1,Math.round(w/200)))+' মিনিট পড়া';
-  $('#dsn').textContent=bn($('#ds').value.length)+'/১৫০';
-  const tl=$('#title').value.trim().length,tc=$('#tcn');tc.textContent=bn(tl)+' অক্ষর'+(tl>100?' — বেশি লম্বা':tl>=20?' — ভালো':'');tc.style.color=tl>100?'var(--rd)':tl>=20?'#34a853':'var(--mu)';
-  const im=$('#im').value.trim();$('#imp').innerHTML=im?`<img src="${esc(im)}" alt="">`:'';seo()}
-function seo(){const p=get()||{},t=$('#title').value.trim(),d=$('#ds').value.trim();let u='আপনার-ব্লগ.blogspot.com';try{if(p.url)u=new URL(p.url).host}catch(e){}
-  $('#sp').innerHTML=`<div style="color:var(--mu);font-size:12px">${esc(u)}</div><div style="color:var(--bl);font-size:16px;line-height:1.35">${esc(t.slice(0,60)||'শিরোনাম এখানে')}${t.length>60?'…':''}</div><div style="font-size:13px;color:var(--mu)">${esc(d||'সার্চ ডেসক্রিপশন এখানে দেখাবে')}</div>`}
-function list(){const q=$('#q').value.trim().toLowerCase();
-  $('#sAll').textContent=bn(posts.length);$('#sPub').textContent=bn(posts.filter(p=>p.st==='pub').length);$('#sDr').textContent=bn(posts.filter(p=>p.st!=='pub').length);
-  $('#plist').innerHTML=posts.filter(p=>(!q||p.title.toLowerCase().includes(q))&&(flt==='all'||(flt==='pub')===(p.st==='pub'))).sort((a,b)=>b.t-a.t).map(p=>
-    `<li data-id="${p.id}" class="${p.id===cur?'on':''}"><div style="display:flex;gap:8px;align-items:center">${p.im?`<img class="th" loading="lazy" alt="" src="${esc(p.im)}">`:''}<div style="flex:1;min-width:0"><div class="tt">${esc(p.title)||'<i>শিরোনামহীন</i>'}</div><small><span><span class="tag ${p.st==='pub'?'pub':''}">${p.st==='pub'?'প্রকাশিত':'খসড়া'}</span>${p.live?' 🌐':''}${p.sc?' ⏰':''}</span><span>${new Date(p.t).toLocaleDateString('bn-BD')}</span></small></div></div></li>`).join('')||'<li style="cursor:default;color:var(--mu)">কোনো পোস্ট মেলেনি — “＋ নতুন পোস্ট” চাপুন</li>'}
-const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function open(id){if(cur)pull();cur=id;push();list();tab('edit')}
-function newPost(){if(cur)pull();const p=mk();posts.push(p);cur=p.id;push();list();store();$('#title').focus()}
-function clean(h){const d=new DOMParser().parseFromString(h,'text/html');
-  d.querySelectorAll('script,style,meta,link,xml,o\\:p').forEach(e=>e.remove());
-  d.querySelectorAll('*').forEach(e=>{e.removeAttribute('class');e.removeAttribute('id');
-    const st=e.getAttribute('style');if(st){const keep=st.split(';').filter(x=>/^\s*(color|background-color|font-weight|font-style|text-decoration|text-align)\s*:/i.test(x)&&!/windowtext|mso/i.test(x));keep.length?e.setAttribute('style',keep.join(';')):e.removeAttribute('style')}});
-  return d.body.innerHTML}
-function final(){return clean($('#ed').innerHTML).replace(/<p>(\s|&nbsp;|<br>)*<\/p>/g,'')}
-function tab(t){$$('.tabs .btn').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
-  ['edit','prev','html'].forEach(x=>$('#p-'+x).classList.toggle('hide',x!==t));
-  pull();
-  if(t==='prev'){const p=get()||{};$('#pv').innerHTML=`<div class="hd"><h2>${esc(p.title||'শিরোনাম')}</h2><span class="cat">${esc(p.cat||'')}</span></div>
-  <div class="by"><div class="av">${esc((p.au||'স')[0])}</div><div><b>${esc(p.au||'প্রতিবেদক')}</b><br><span style="color:var(--mu)">${new Date().toLocaleDateString('bn-BD',{dateStyle:'long'})}</span></div></div>
-  ${p.im?`<img src="${esc(p.im)}" alt="" style="width:100%;margin-bottom:14px;border-radius:4px">`:''}<div class="bd">${final()}</div>`}
-  if(t==='html'){$('#htm').value=final()}}
-function cmd(c,v){$('#ed').focus();document.execCommand('styleWithCSS',false,true);document.execCommand(c,false,v||null);meta()}
-$('#tb').addEventListener('mousedown',e=>{if(e.target.tagName!=='SELECT'&&e.target.tagName!=='INPUT')e.preventDefault()});
-$$('#tb [data-c]').forEach(b=>b.onclick=()=>cmd(b.dataset.c));
-$('#blk').onchange=e=>{cmd('formatBlock',e.target.value)};
-$('#fn').onchange=e=>{e.target.value&&cmd('fontName',e.target.value);e.target.selectedIndex=0};
-$('#lh').onchange=e=>{const v=e.target.value;e.target.selectedIndex=0;if(!v)return;const g=getSelection();if(!g.rangeCount)return;let n=g.anchorNode;n=n.nodeType===3?n.parentElement:n;const blk=n&&n.closest?n.closest('#ed > *')||n.closest('p,div,li,blockquote,h1,h2,h3,h4'):null;if(blk)blk.style.lineHeight=v;else document.execCommand('formatBlock','p');meta()};
-$('#fs').onchange=e=>{e.target.value&&cmd('fontSize',e.target.value);e.target.selectedIndex=0};
-$('#fc').oninput=e=>cmd('foreColor',e.target.value);
-$('#bc').oninput=e=>cmd('hiliteColor',e.target.value);
-$('#lnk').onclick=()=>{const u=prompt('লিংক (URL):','https://');u&&cmd('createLink',u)};
-$('#frb').onclick=()=>{const f=prompt('কোন লেখাটি খুঁজবেন?');if(!f)return;const r=prompt('এটা দিয়ে কী বসাবেন? (খালি রাখলে শুধু খুঁজবে)','');const ed=$('#ed'),tw=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);let n,cnt=0;while(n=tw.nextNode()){if(n.nodeValue.includes(f)){cnt+=(n.nodeValue.split(f).length-1);if(r!==null&&r!=='')n.nodeValue=n.nodeValue.split(f).join(r)}}if(r!==null&&r!==''){auto();toast(bn(cnt)+' জায়গায় বদলানো হয়েছে')}else{toast(cnt?bn(cnt)+' জায়গায় পাওয়া গেছে':'পাওয়া যায়নি')}};
-$('#imu').onclick=()=>{const u=prompt('ছবির লিংক (URL):','https://');u&&cmd('insertImage',u)};
-$('#ed').addEventListener('paste',e=>{e.preventDefault();const h=e.clipboardData.getData('text/html'),t=e.clipboardData.getData('text/plain');
-  document.execCommand('insertHTML',false,h?clean(h):esc(t).replace(/\n/g,'<br>'));meta()});
-let tm;const auto=()=>{clearTimeout(tm);meta();tm=setTimeout(()=>{pull();store();list()},700)};
-$('#ed').addEventListener('input',auto);['#title','#cat','#lb','#ds','#im','#au','#st','#sc'].forEach(s=>$(s).addEventListener('input',auto));
-$$('.tabs .btn').forEach(b=>b.onclick=()=>tab(b.dataset.t));
-$('#plist').onclick=e=>{const li=e.target.closest('li[data-id]');li&&open(li.dataset.id)};
-$('#q').oninput=list;$('#newp').onclick=newPost;
-$('#save').onclick=()=>{pull();store();list();toast('সংরক্ষণ হয়েছে')};
-$('#del').onclick=()=>{if(!confirm('এই পোস্ট মুছে ফেলবেন?'))return;posts=posts.filter(p=>p.id!==cur);cur=null;store();posts.length?open(posts[0].id):newPost();list()};
-$('#copyb').onclick=async()=>{pull();const h=final();
-  try{await navigator.clipboard.writeText(h);toast('HTML কপি হয়েছে')}catch(e){tab('html');$('#htm').select();document.execCommand('copy');toast('HTML ট্যাব থেকে কপি করুন')}};
-$('#theme').onclick=()=>{const r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()==='#121212';r.dataset.theme=d?'light':'dark'};
-let rng;document.addEventListener('selectionchange',()=>{const g=getSelection();if(g.rangeCount&&$('#ed').contains(g.anchorNode))rng=g.getRangeAt(0)});
-let cfg={};try{cfg=JSON.parse(localStorage.getItem('nd_cfg')||'{}')}catch(e){}
-const fillCfg=()=>{$('#cid').value=cfg.cid||'';$('#bid').value=cfg.bid||'';$('#ik').value=cfg.ik||''};
-$('#cfgb').onclick=()=>{fillCfg();$('#cfg').classList.remove('hide')};$('#cfgx').onclick=()=>$('#cfg').classList.add('hide');
-$('#cfgs').onclick=()=>{cfg={cid:$('#cid').value.trim(),bid:$('#bid').value.trim(),ik:$('#ik').value.trim()};try{localStorage.setItem('nd_cfg',JSON.stringify(cfg))}catch(e){}$('#cfg').classList.add('hide');toast('সংযোগ সেটিংস সংরক্ষিত')};
-let tok=null,tokExp=0;
-const auth=()=>new Promise((ok,no)=>{if(tok&&Date.now()<tokExp)return ok(tok);
- if(!window.google||!cfg.cid)return no(new Error('Client ID দিন এবং http(s) ঠিকানা থেকে খুলুন'));
- google.accounts.oauth2.initTokenClient({client_id:cfg.cid,scope:'https://www.googleapis.com/auth/blogger',
- callback:r=>{if(r.error)return no(new Error(r.error_description||r.error));tok=r.access_token;tokExp=Date.now()+(r.expires_in-60)*1000;ok(tok)},
- error_callback:e=>{if(e&&e.type==='popup_failed_to_open')setTimeout(()=>{if(confirm('পপআপ ব্লক হয়েছে। পপআপ ছাড়া (পেজ বদলে) লগইন করবেন?'))rlogin()},50);no(new Error(e&&e.type==='popup_failed_to_open'?'পপআপ ব্লক হয়েছে — ঠিকানা বারের পপআপ আইকন থেকে Allow করুন':e&&e.type==='popup_closed'?'লগইন উইন্ডো বন্ধ হয়ে গেছে (উইন্ডোতে কী এরর ছিল দেখুন)':'লগইন ব্যর্থ: '+((e&&e.type)||'অজানা')))}}).requestAccessToken()});
-function rlogin(){if(!cfg.cid){fillCfg();$('#cfg').classList.remove('hide');return toast('আগে Client ID দিন')}
- try{pull();store()}catch(e){}
- location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:cfg.cid,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/blogger',include_granted_scopes:'true',prompt:'select_account'})}
-$('#lgn').onclick=rlogin;
-const shrinkSrc=src=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1200/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.82))};im.onerror=()=>no(new Error('ছবি পড়া যায়নি'));im.src=src});
-async function toImgbb(d){const fd=new FormData();fd.append('image',d.split(',')[1]);const r=await fetch('https://api.imgbb.com/1/upload?key='+cfg.ik,{method:'POST',body:fd}),j=await r.json();if(!j.success)throw new Error(j.error&&j.error.message||'ImgBB আপলোড ব্যর্থ');return j.data.url}
-async function fixEd(){const ims=[...$('#ed').querySelectorAll('img[src^="data:"]')],f=$('#im').value.trim().startsWith('data:');
- if(!ims.length&&!f)return;if(!cfg.ik)throw new Error('লেখায় এম্বেড ছবি আছে। আগে ⚙ সংযোগ-এ ImgBB key দিন');
- let n=0;for(const i of ims){n++;toast('ছবি আপলোড হচ্ছে… '+bn(n)+'/'+bn(ims.length+(f?1:0)),8000);i.src=await toImgbb(await shrinkSrc(i.src))}
- if(f)$('#im').value=await toImgbb(await shrinkSrc($('#im').value.trim()));
- pull();store();meta()}
-async function api(path,method,body){const t=await auth();
- const r=await fetch('https://www.googleapis.com/blogger/v3/blogs/'+cfg.bid+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
- const j=await r.json();if(!r.ok)throw new Error(j.error&&j.error.message||r.status);return j}
-$('#pubb').onclick=async()=>{pull();const p=get();
- if(!cfg.bid||!cfg.cid){fillCfg();return $('#cfg').classList.remove('hide')}
- if(!p.title.trim())return toast('শিরোনাম লিখুন');
- if(p.st==='pub'&&window.score<3&&!confirm('প্রকাশের প্রস্তুতি অসম্পূর্ণ। তবুও লাইভ করবেন?'))return;
- const b=$('#pubb');b.disabled=true;b.textContent='পাঠানো হচ্ছে…';
- try{await auth();await fixEd();const labels=[p.cat,...p.lb.split(',').map(x=>x.trim()).filter(Boolean)].filter((v,i,a)=>v&&a.indexOf(v)===i);
-  let h=final();if(p.im&&!h.includes(p.im))h=`<div class="separator" style="text-align:center"><img src="${esc(p.im)}" alt="${esc(p.title)}" style="max-width:100%"></div>`+h;
-  const live=p.st==='pub',body={kind:'blogger#post',title:p.title,content:h,labels};if(p.sc)body.published=new Date(p.sc).toISOString();let r;
-  if(p.bid){r=await api('/posts/'+p.bid,'PATCH',body);if(live&&!p.live)r=await api('/posts/'+p.bid+'/publish','POST')}
-  else r=await api('/posts?isDraft='+!live,'POST',body);
-  p.bid=r.id;p.url=r.url;p.live=live;store();list();push();toast(live?'প্রকাশিত হয়েছে ✓':'খসড়া হিসেবে Blogger-এ জমা হয়েছে ✓',3000)
- }catch(e){toast('ব্যর্থ: '+e.message,4500)}
- b.disabled=false;b.textContent='Blogger-এ পাঠান'};
-const shrink=f=>new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(f);
- im.onload=()=>{const k=Math.min(1,1200/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.82))};
- im.onerror=()=>no(new Error('ছবি পড়া যায়নি'));im.src=u});
-async function upImg(f){toast('ছবি প্রস্তুত হচ্ছে…',6000);const d=await shrink(f);
- if(!cfg.ik)throw new Error('আগে ⚙ সংযোগ-এ ImgBB key দিন')
- const fd=new FormData();fd.append('image',d.split(',')[1]);
- const r=await fetch('https://api.imgbb.com/1/upload?key='+cfg.ik,{method:'POST',body:fd}),j=await r.json();
- if(!j.success)throw new Error(j.error&&j.error.message||'আপলোড ব্যর্থ');toast('ছবি আপলোড হয়েছে ✓');return j.data.url}
-$('#img').onclick=()=>$('#imf').click();$('#imb').onclick=()=>$('#imf2').click();
-$('#imf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
- try{const u=await upImg(f);$('#ed').focus();if(rng){const g=getSelection();g.removeAllRanges();g.addRange(rng)}cmd('insertImage',u);auto()}catch(x){toast('ব্যর্থ: '+x.message,4000)}};
-$('#imf2').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
- try{$('#im').value=await upImg(f);auto()}catch(x){toast('ব্যর্থ: '+x.message,4000)}};
-let flt='all';
-const BASE=['সিলেটের খবর','জাতীয়','আন্তর্জাতিক','রাজনীতি','ইসলামী দাওয়াহ','খেলাধুলা','বিনোদন','অন্যান্য'];
-function chk(){const t=$('#title').value.trim().length,w=($('#ed').innerText.trim().match(/\S+/g)||[]).length,d=$('#ds').value.trim().length;
- const it=[[t>=20&&t<=100,`শিরোনাম ২০–১০০ অক্ষর (এখন ${bn(t)})`],[w>=100,`কমপক্ষে ১০০ শব্দ (এখন ${bn(w)})`],[!!$('#im').value.trim(),'ফিচার্ড ছবি'],[d>=50,`সার্চ ডেসক্রিপশন ৫০+ অক্ষর (এখন ${bn(d)})`],[!!$('#au').value.trim(),'লেখকের নাম']];
- const n=window.score=it.filter(x=>x[0]).length;
- $('#chk').innerHTML=`<div style="height:6px;background:var(--bd);border-radius:3px;overflow:hidden"><div style="width:${n*20}%;height:100%;background:${n>=4?'#34a853':n>=2?'#f9ab00':'#b71c1c'}"></div></div><ul style="list-style:none;padding:0;margin:8px 0 0;font-size:13px">${it.map(x=>`<li style="color:${x[0]?'#34a853':'var(--mu)'}">${x[0]?'✔':'○'} ${x[1]}</li>`).join('')}</ul>`}
-function chips(){const cu=$('#lb').value.split(',').map(x=>x.trim()).filter(Boolean),c=$('#cat').value;
- const all=[...new Set([...BASE,...posts.flatMap(p=>(p.lb||'').split(',').map(x=>x.trim()).filter(Boolean))])].filter(x=>x!==c&&!cu.includes(x));
- $('#chips').innerHTML=all.slice(0,12).map(x=>`<span data-l="${esc(x)}">＋ ${esc(x)}</span>`).join('')}
-$('#chips').onclick=e=>{const l=e.target.dataset.l;if(!l)return;const v=$('#lb').value.trim().replace(/,\s*$/,'');$('#lb').value=v?v+', '+l:l;auto()};
-$('#gd').onclick=e=>{e.preventDefault();const t=$('#ed').innerText.replace(/\s+/g,' ').trim();if(!t)return toast('আগে লেখা লিখুন');let d=t.slice(0,150);const i=d.lastIndexOf('।');if(i>60)d=d.slice(0,i+1);$('#ds').value=d;auto()};
-const QI={dl:'<p><b>সিলেট প্রতিনিধি:</b> </p>',cap:'<p style="text-align:center;color:#777"><i>ছবি: সংগৃহীত</i></p>',pq:'<blockquote>উদ্ধৃতি এখানে লিখুন</blockquote>',rm:'<blockquote><b>আরও পড়ুন:</b> <a href="#">লিংকের লেখা</a></blockquote>',src:'<p style="color:#777"><i>সূত্র: </i></p>',en:'<blockquote><b>সম্পাদকের নোট:</b> </blockquote>',
- tbl:'<table border="1" cellpadding="6" style="width:100%"><tbody><tr><td><b>শিরোনাম ১</b></td><td><b>শিরোনাম ২</b></td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table><p></p>',
- yt:()=>{const u=prompt('ইউটিউব ভিডিওর লিংক:','https://'),m=u&&u.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);if(!m){u&&toast('লিংকটি সঠিক নয়');return ''}
-  return `<div class="separator" style="text-align:center"><iframe width="560" height="315" src="https://www.youtube.com/embed/${m[1]}" allowfullscreen></iframe></div><p></p>`}};
-$('#qi').onchange=e=>{const v=e.target.value;e.target.selectedIndex=0;if(v){const x=typeof QI[v]==='function'?QI[v]():QI[v];x&&cmd('insertHTML',x)}};
-$$('.flt .btn').forEach(b=>b.onclick=()=>{flt=b.dataset.f;$$('.flt .btn').forEach(x=>x.classList.toggle('on',x===b));list()});
-$('#dup').onclick=()=>{pull();const g=get();const p={...g,id:'p'+Date.now(),title:g.title+' (কপি)',st:'draft',bid:'',url:'',live:false,t:Date.now()};posts.push(p);cur=p.id;push();list();store();toast('কপি তৈরি হয়েছে')};
-$('#bk').onclick=()=>{pull();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(posts)],{type:'application/json'}));a.download='posts-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()};
-$('#rs').onclick=()=>$('#rsf').click();
-$('#rsf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const a=JSON.parse(await f.text());if(!Array.isArray(a))throw 0;const ids=new Set(posts.map(p=>p.id));let n=0;a.forEach(p=>{if(p&&p.id&&!ids.has(p.id)){posts.push(p);n++}});store();list();toast(bn(n)+'টি পোস্ট রিস্টোর হয়েছে')}catch(x){toast('ফাইলটি সঠিক নয়')}};
-$('#dev').onclick=()=>{const m=$('#pv').classList.toggle('m');$('#dev').textContent=m?'🖥 ডেস্কটপ':'📱 মোবাইল'};
-$('#au').addEventListener('input',()=>{try{localStorage.setItem('nd_au',$('#au').value)}catch(e){}});
-addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();$('#save').click()}});
-const TT={bold:'গাঢ় (Ctrl+B)',italic:'বাঁকা (Ctrl+I)',underline:'আন্ডারলাইন (Ctrl+U)',strikeThrough:'কাটা দাগ',justifyLeft:'বাঁ দিকে',justifyCenter:'মাঝখানে',justifyRight:'ডান দিকে',justifyFull:'দুই পাশ সমান',insertUnorderedList:'বুলেট তালিকা',insertOrderedList:'ক্রমিক তালিকা',outdent:'ভেতর থেকে বের',indent:'ভেতরে',insertHorizontalRule:'বিভাজক রেখা',removeFormat:'ফরম্যাট মুছুন'};
-$$('#tb [data-c]').forEach(b=>b.title=b.title||TT[b.dataset.c]||'');
-$('#fz').onclick=()=>document.body.classList.toggle('fz');
-const fsz=d=>{const e=$('#ed');e.style.fontSize=Math.min(28,Math.max(14,parseInt(getComputedStyle(e).fontSize)+d))+'px'};
-$('#fm').onclick=()=>fsz(-2);$('#fp').onclick=()=>fsz(2);
-addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remove('fz');if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('#lnk').click()}if((e.ctrlKey||e.metaKey)&&e.key==='f'&&document.activeElement&&$('#ed').contains(document.activeElement)){e.preventDefault();$('#frb').click()}});
-(function(){const h=new URLSearchParams(location.hash.slice(1));if(h.get('access_token')){tok=h.get('access_token');tokExp=Date.now()+((+h.get('expires_in')||3600)-60)*1000;history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>toast('লগইন সফল ✓ এবার “Blogger-এ পাঠান” চাপুন',4000),400)}})();
-load();posts.length?open(posts.sort((a,b)=>b.t-a.t)[0].id):newPost();
-</script>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <!-- Firebase Invisible reCAPTCHA Container -->
+  <div id="recaptcha-container"></div>
+
+  <!-- Main App Script (must be type="module" for Firebase) -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
