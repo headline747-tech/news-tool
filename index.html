@@ -242,7 +242,8 @@ let tok=null,tokExp=0;
 const auth=()=>new Promise((ok,no)=>{if(tok&&Date.now()<tokExp)return ok(tok);
  if(!window.google||!cfg.cid)return no(new Error('Client ID দিন এবং http(s) ঠিকানা থেকে খুলুন'));
  google.accounts.oauth2.initTokenClient({client_id:cfg.cid,scope:'https://www.googleapis.com/auth/blogger',
- callback:r=>{if(r.error)return no(new Error(r.error));tok=r.access_token;tokExp=Date.now()+(r.expires_in-60)*1000;ok(tok)}}).requestAccessToken()});
+ callback:r=>{if(r.error)return no(new Error(r.error_description||r.error));tok=r.access_token;tokExp=Date.now()+(r.expires_in-60)*1000;ok(tok)},
+ error_callback:e=>no(new Error(e&&e.type==='popup_failed_to_open'?'পপআপ ব্লক হয়েছে — ঠিকানা বারের পপআপ আইকন থেকে Allow করুন':e&&e.type==='popup_closed'?'লগইন উইন্ডো বন্ধ হয়ে গেছে (উইন্ডোতে কী এরর ছিল দেখুন)':'লগইন ব্যর্থ: '+((e&&e.type)||'অজানা')))}).requestAccessToken()});
 async function api(path,method,body){const t=await auth();
  const r=await fetch('https://www.googleapis.com/blogger/v3/blogs/'+cfg.bid+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
  const j=await r.json();if(!r.ok)throw new Error(j.error&&j.error.message||r.status);return j}
