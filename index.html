@@ -77,6 +77,15 @@ body.fz .wrap{grid-template-columns:minmax(0,860px);justify-content:center}body.
 body{overflow-x:hidden}
 @media(max-width:700px){.top{flex-wrap:nowrap;overflow-x:auto}.top h1{font-size:16px;white-space:nowrap}.top .btn,#saved{white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.ac{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;margin-top:6px}
+.ac.on{border-color:var(--rd);background:var(--soft)}
+.ac .av2{width:34px;height:34px;border-radius:50%;background:#b71c1c;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden}
+.ac .av2 img{width:100%;height:100%;object-fit:cover}
+.ac .inf{flex:1;min-width:0;overflow-wrap:anywhere;font-size:12.5px;color:var(--mu)}
+.ac .inf b{display:block;font-size:14px;color:var(--tx)}
+.btn.xs{padding:2px 8px;font-size:12px;border-radius:6px;white-space:nowrap}
+#acb2 h4{margin:16px 0 2px;font-size:14px}
+.note{font-size:12px;color:var(--mu);margin-top:10px}
 </style>
 </head>
 <body>
@@ -85,7 +94,7 @@ body{overflow-x:hidden}
   <span id="saved" style="font-size:13px;opacity:.85"></span>
   <button class="btn" id="fz" title="ফোকাস মোড (Esc দিয়ে বের হন)">🎯 ফোকাস</button><button class="btn" id="theme" title="থিম">🌓</button>
   <button class="btn" id="save">সংরক্ষণ</button>
-  <button class="btn" id="lgn" title="পপআপ ছাড়া Google লগইন">🔑 লগইন</button><button class="btn" id="cfgb">⚙ সংযোগ</button><button class="btn" id="copyb">HTML কপি</button><button class="btn pri" id="pubb">Blogger-এ পাঠান</button>
+  <button class="btn" id="lgn" title="পপআপ ছাড়া Google লগইন">🔑 লগইন</button><button class="btn" id="acb" title="একাধিক ইমেইল ও অনুমোদন">👥 অ্যাকাউন্ট</button><button class="btn" id="cfgb">⚙ সংযোগ</button><button class="btn" id="copyb">HTML কপি</button><button class="btn pri" id="pubb">Blogger-এ পাঠান</button>
 </div>
 <div class="wrap">
   <aside class="card" style="align-self:start">
@@ -158,10 +167,12 @@ body{overflow-x:hidden}
 <label>ImgBB API key (ছবি আপলোডের জন্য, ঐচ্ছিক)</label><input class="f" id="ik" placeholder="api.imgbb.com থেকে বিনামূল্যে">
 <ol style="font-size:13px;color:var(--mu);padding-left:18px">
 <li>console.cloud.google.com-এ প্রজেক্ট খুলে <b>Blogger API v3</b> চালু করুন।</li>
-<li>OAuth consent screen-এ Test users-এ আপনার Gmail যোগ করুন।</li>
+<li>OAuth consent screen-এ Test users-এ যত জন ইমেইল ব্যবহার করবেন সবার Gmail যোগ করুন (প্রত্যেককে Blogger ব্লগেও Author/Admin করতে হবে)।</li>
 <li>Credentials → OAuth client ID (Web application) → Authorized JavaScript origins-এ যে ঠিকানা থেকে ফাইল খুলবেন সেটি দিন (যেমন http://localhost:8000)।</li>
 <li>file:// থেকে খুললে Google লগইন চলবে না; হোস্ট করুন বা localhost সার্ভারে চালান।</li></ol>
 <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="cfgx">বন্ধ</button><button class="btn pri" id="cfgs">সংরক্ষণ</button></div></div></div>
+<div id="acm" class="modal hide"><div class="card" style="max-width:560px;width:100%;max-height:90%;overflow:auto">
+<h3>অ্যাকাউন্ট ও অনুমোদন</h3><div id="acb2"></div></div></div>
 <div id="toast"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -238,19 +249,71 @@ let cfg={};try{cfg=JSON.parse(localStorage.getItem('nd_cfg')||'{}')}catch(e){}
 const fillCfg=()=>{$('#cid').value=cfg.cid||'';$('#bid').value=cfg.bid||'';$('#ik').value=cfg.ik||''};
 $('#cfgb').onclick=()=>{fillCfg();$('#cfg').classList.remove('hide')};$('#cfgx').onclick=()=>$('#cfg').classList.add('hide');
 $('#cfgs').onclick=()=>{cfg={cid:$('#cid').value.trim(),bid:$('#bid').value.trim(),ik:$('#ik').value.trim()};try{localStorage.setItem('nd_cfg',JSON.stringify(cfg))}catch(e){}$('#cfg').classList.add('hide');toast('সংযোগ সেটিংস সংরক্ষিত')};
-let tok=null,tokExp=0;
-try{const o=JSON.parse(localStorage.getItem('nd_tok')||'null');if(o&&Date.now()<o.e){tok=o.t;tokExp=o.e}}catch(e){}
 const SESS=24*60*60*1000;
-const sessLeft=()=>{try{return Math.max(0,(+localStorage.getItem('nd_sess')||0)-Date.now())}catch(e){return 0}};
-function updLgn(){const l=sessLeft(),b=$('#lgn');if(!b)return;b.textContent=l>0?'🔑 লগইন ✓ ('+bn(Math.ceil(l/3600000))+' ঘণ্টা বাকি)':'🔑 লগইন'}
-function rlogin(silent){if(!cfg.cid){fillCfg();$('#cfg').classList.remove('hide');return toast('আগে Client ID দিন')}
+const lsGet=(k,d)=>{try{const r=localStorage.getItem(k);return r?JSON.parse(r):d}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const normE=s=>String(s||'').trim().toLowerCase(),isEm=s=>/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(s);
+let acl=Object.assign({admins:[],allow:[],pending:[]},lsGet('nd_acl',{}));
+let accts=lsGet('nd_accts',[]),active='';try{active=localStorage.getItem('nd_active')||''}catch(e){}
+const saveAcl=()=>lsSet('nd_acl',acl),saveAcc=()=>{lsSet('nd_accts',accts);try{localStorage.setItem('nd_active',active)}catch(e){}};
+const isAdmin=e=>acl.admins.includes(normE(e)),approved=e=>isAdmin(e)||acl.allow.includes(normE(e));
+const acc=()=>accts.find(a=>a.email===active)||null;
+function purge(){const n=accts.length;accts=accts.filter(a=>approved(a.email));if(!accts.some(a=>a.email===active))active=accts[0]?accts[0].email:'';if(n!==accts.length)saveAcc()}
+purge();
+const sessLeft=()=>{const a=acc();return a?Math.max(0,(a.sess||0)-Date.now()):0};
+function updLgn(){const l=sessLeft(),b=$('#lgn'),a=acc();if(!b)return;b.textContent=a&&l>0?'🔑 '+a.email.split('@')[0]+' ✓ ('+bn(Math.ceil(l/3600000))+' ঘণ্টা বাকি)':'🔑 লগইন'}
+function rlogin(mode){if(!cfg.cid){fillCfg();$('#cfg').classList.remove('hide');return toast('আগে Client ID দিন')}
  try{pull();store()}catch(e){}
- location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:cfg.cid,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/blogger',include_granted_scopes:'true',prompt:silent===true?'none':'select_account',state:silent===true?'s':'i'})}
-const auth=()=>new Promise((ok,no)=>{if(tok&&Date.now()<tokExp)return ok(tok);
+ const q={client_id:cfg.cid,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/blogger openid email profile',include_granted_scopes:'true',prompt:mode==='s'?'none':'select_account',state:mode==='s'?'s':mode==='a'?'a':'i'};
+ if(mode==='s'&&active)q.login_hint=active;
+ location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams(q)}
+const auth=()=>new Promise((ok,no)=>{const a=acc();
+ if(!a)return no(new Error('আগে উপরের 🔑 লগইন চাপুন'));
+ if(!approved(a.email))return no(new Error('এই ইমেইল অনুমোদিত নয়'));
+ if(Date.now()<a.exp)return ok(a.tok);
  if(!cfg.cid)return no(new Error('আগে ⚙ সংযোগ-এ Client ID দিন'));
- if(sessLeft()>0){try{localStorage.setItem('nd_resend','1')}catch(e){}toast('লগইন নবায়ন হচ্ছে…',4000);rlogin(true);return}
+ if(sessLeft()>0){try{localStorage.setItem('nd_resend','1')}catch(e){}toast('লগইন নবায়ন হচ্ছে…',4000);rlogin('s');return}
  no(new Error('২৪ ঘণ্টার লগইন শেষ — উপরের 🔑 লগইন চাপুন'))});
+function resendCheck(){try{const a=acc();if(localStorage.getItem('nd_resend')&&a&&Date.now()<a.exp){localStorage.removeItem('nd_resend');setTimeout(()=>$('#pubb').click(),1000)}}catch(e){}}
+const copyTxt=async(t,m)=>{try{await navigator.clipboard.writeText(t);toast(m)}catch(e){prompt('কপি করুন:',t)}};
+function renderAc(note){
+ const me=acc(),adm=!!me&&isAdmin(me.email),row=(x,on)=>`<div class="ac${on?' on':''}">${x}</div>`;
+ let h=note?`<div class="sp" style="margin:0 0 8px">${note}</div>`:'';
+ h+='<h4>লগইন করা অ্যাকাউন্ট (এই ডিভাইসে)</h4>';
+ h+=accts.length?accts.map(a=>row(`<div class="av2">${a.pic?`<img src="${esc(a.pic)}" alt="" referrerpolicy="no-referrer">`:esc((a.name||a.email)[0].toUpperCase())}</div><div class="inf"><b>${esc(a.name||a.email)}</b>${esc(a.email)} · ${isAdmin(a.email)?'অ্যাডমিন':'সদস্য'}${a.email===active?' · <span style="color:#34a853">সক্রিয়</span>':''}</div>${a.email===active?'':`<button class="btn xs" data-a="use" data-e="${esc(a.email)}">ব্যবহার করুন</button>`}<button class="btn xs" data-a="out" data-e="${esc(a.email)}">লগআউট</button>`,a.email===active)).join(''):'<div class="note">কোনো অ্যাকাউন্ট লগইন করা নেই</div>';
+ h+='<button class="btn" data-a="add" style="width:100%;margin-top:8px">＋ আরেকটি ইমেইল দিয়ে লগইন</button>';
+ if(acl.pending.length)h+='<h4>অনুমোদনের অপেক্ষায়</h4>'+acl.pending.map(p=>row(`<div class="inf"><b>${esc(p.e)}</b>${new Date(p.t).toLocaleString('bn-BD')}</div><button class="btn xs" data-a="rq" data-e="${esc(p.e)}">অনুরোধ কোড</button>${adm?`<button class="btn xs pri" data-a="ok" data-e="${esc(p.e)}">অনুমোদন</button><button class="btn xs" data-a="no" data-e="${esc(p.e)}">বাতিল</button>`:''}`)).join('');
+ if(adm){
+  h+='<h4>অনুমোদিত ইমেইল</h4>'+[...acl.admins.map(e=>[e,1]),...acl.allow.filter(e=>!acl.admins.includes(e)).map(e=>[e,0])].map(([e,ad])=>row(`<div class="inf"><b>${esc(e)}</b>${ad?'অ্যাডমিন':'সদস্য'}</div><button class="btn xs" data-a="tg" data-e="${esc(e)}">${ad?'অ্যাডমিন সরান':'অ্যাডমিন করুন'}</button><button class="btn xs" data-a="rm" data-e="${esc(e)}">সরান</button>`)).join('');
+  h+='<div style="display:flex;gap:6px;margin-top:8px"><input class="f" id="acE" placeholder="নতুন ইমেইল অনুমোদন দিন (name@gmail.com)"><button class="btn pri" data-a="add-e">অনুমোদন</button></div>';
+  h+='<div style="display:flex;gap:6px;margin-top:6px"><input class="f" id="acR" placeholder="কর্মীর পাঠানো অনুরোধ কোড পেস্ট করুন"><button class="btn" data-a="add-r">যোগ করুন</button></div>'}
+ h+='<h4>অন্য ডিভাইসে অনুমোদন তালিকা ও সেটআপ</h4>'+(adm?'<button class="btn" data-a="exp" style="width:100%">অ্যাকসেস কোড কপি করুন</button>':'')+'<div style="display:flex;gap:6px;margin-top:6px"><input class="f" id="acI" placeholder="অ্যাকসেস কোড পেস্ট করুন"><button class="btn" data-a="imp">ইমপোর্ট</button></div>';
+ h+='<div class="note">নতুন ডিভাইসে লগইনের আগে অ্যাকসেস কোড ইমপোর্ট করুন। এই তালিকা শুধু ড্যাশবোর্ড ব্যবহারের নিয়ন্ত্রণ; আসল নিরাপত্তা Google OAuth Test users ও Blogger ব্লগের Author/Admin অনুমতি দিয়েই হয়।</div><div style="text-align:right;margin-top:10px"><button class="btn" data-a="x">বন্ধ</button></div>';
+ $('#acb2').innerHTML=h}
 $('#lgn').onclick=()=>rlogin();
+$('#acb').onclick=()=>{$('#acm').classList.remove('hide');renderAc()};
+$('#acm').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b){if(e.target.id==='acm')$('#acm').classList.add('hide');return}
+ const k=b.dataset.a,em=b.dataset.e,me=acc(),adm=!!me&&isAdmin(me.email);
+ if(['ok','no','tg','rm','add-e','add-r','exp'].includes(k)&&!adm)return toast('শুধু অ্যাডমিন এটি করতে পারবেন');
+ switch(k){
+ case 'x':$('#acm').classList.add('hide');break;
+ case 'add':rlogin('a');break;
+ case 'use':active=em;saveAcc();updLgn();renderAc();toast(em+' সক্রিয় হয়েছে');break;
+ case 'out':accts=accts.filter(v=>v.email!==em);if(active===em)active=accts[0]?accts[0].email:'';saveAcc();updLgn();renderAc();toast('লগআউট হয়েছে');break;
+ case 'rq':copyTxt('NDR1.'+btoa(JSON.stringify({e:em,t:Date.now()})),'অনুরোধ কোড কপি হয়েছে — অ্যাডমিনকে পাঠান');break;
+ case 'ok':acl.pending=acl.pending.filter(p=>p.e!==em);if(!approved(em))acl.allow.push(em);saveAcl();renderAc();toast(em+' অনুমোদিত ✓');break;
+ case 'no':acl.pending=acl.pending.filter(p=>p.e!==em);saveAcl();renderAc();break;
+ case 'tg':if(isAdmin(em)){if(acl.admins.length<2)return toast('অন্তত একজন অ্যাডমিন থাকতে হবে');acl.admins=acl.admins.filter(x=>x!==em);acl.allow.push(em)}else{acl.allow=acl.allow.filter(x=>x!==em);acl.admins.push(em)}saveAcl();purge();updLgn();renderAc();break;
+ case 'rm':if(isAdmin(em)&&acl.admins.length<2)return toast('শেষ অ্যাডমিনকে সরানো যাবে না');if(!confirm(em+' কে সরাবেন?'))return;acl.admins=acl.admins.filter(x=>x!==em);acl.allow=acl.allow.filter(x=>x!==em);saveAcl();purge();updLgn();renderAc();break;
+ case 'add-e':{const x=normE($('#acE').value);if(!isEm(x))return toast('সঠিক ইমেইল লিখুন');if(!approved(x))acl.allow.push(x);acl.pending=acl.pending.filter(p=>p.e!==x);saveAcl();renderAc(esc(x)+' অনুমোদিত ✓');break}
+ case 'add-r':{const v=($('#acR').value||'').trim();try{if(!v.startsWith('NDR1.'))throw 0;const d=JSON.parse(atob(v.slice(5))),x=normE(d.e);if(!isEm(x))throw 0;if(approved(x))return toast('এটি আগেই অনুমোদিত');if(!acl.pending.some(p=>p.e===x))acl.pending.push({e:x,t:Date.now()});saveAcl();renderAc()}catch(err){toast('অনুরোধ কোডটি সঠিক নয়')}break}
+ case 'exp':copyTxt('NDA1.'+btoa(JSON.stringify({a:acl.admins,l:acl.allow,c:cfg.cid||'',b:cfg.bid||''})),'অ্যাকসেস কোড কপি হয়েছে');break;
+ case 'imp':{const v=($('#acI').value||'').trim();if(!v.startsWith('NDA1.'))return toast('কোডটি সঠিক নয়');if(acl.admins.length&&!adm)return toast('শুধু অ্যাডমিন ইমপোর্ট করতে পারবেন');
+  try{const d=JSON.parse(atob(v.slice(5))),f=x=>Array.isArray(x)?x.map(normE).filter(isEm):[],ad=f(d.a),al=f(d.l);if(!ad.length)throw 0;
+   acl.admins=ad;acl.allow=al.filter(x=>!ad.includes(x));acl.pending=acl.pending.filter(p=>!approved(p.e));saveAcl();
+   if(!cfg.cid&&d.c)cfg.cid=String(d.c);if(!cfg.bid&&d.b)cfg.bid=String(d.b);lsSet('nd_cfg',cfg);
+   purge();updLgn();renderAc('অ্যাকসেস কোড ইমপোর্ট হয়েছে ✓')}catch(err){toast('কোডটি সঠিক নয়')}break}
+ }});
 updLgn();setInterval(updLgn,60000);
 const shrinkSrc=src=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1200/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.82))};im.onerror=()=>no(new Error('ছবি পড়া যায়নি'));im.src=src});
 async function toImgbb(d){const fd=new FormData();fd.append('image',d.split(',')[1]);const r=await fetch('https://api.imgbb.com/1/upload?key='+cfg.ik,{method:'POST',body:fd}),j=await r.json();if(!j.success)throw new Error(j.error&&j.error.message||'ImgBB আপলোড ব্যর্থ');return j.data.url}
@@ -318,17 +381,27 @@ $('#fz').onclick=()=>document.body.classList.toggle('fz');
 const fsz=d=>{const e=$('#ed');e.style.fontSize=Math.min(28,Math.max(14,parseInt(getComputedStyle(e).fontSize)+d))+'px'};
 $('#fm').onclick=()=>fsz(-2);$('#fp').onclick=()=>fsz(2);
 addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remove('fz');if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('#lnk').click()}if((e.ctrlKey||e.metaKey)&&e.key==='f'&&document.activeElement&&$('#ed').contains(document.activeElement)){e.preventDefault();$('#frb').click()}});
-(function(){const h=new URLSearchParams(location.hash.slice(1));
- if(h.get('access_token')){tok=h.get('access_token');tokExp=Date.now()+((+h.get('expires_in')||3600)-60)*1000;
-  try{localStorage.setItem('nd_tok',JSON.stringify({t:tok,e:tokExp}));if(h.get('state')!=='s')localStorage.setItem('nd_sess',String(Date.now()+SESS))}catch(e){}
-  history.replaceState(null,'',location.pathname+location.search);updLgn();
-  setTimeout(()=>toast(h.get('state')==='s'?'লগইন নবায়ন হয়েছে ✓':'লগইন সফল ✓ — ২৪ ঘণ্টা সক্রিয় থাকবে',3500),400)}
- else if(h.get('error')){try{localStorage.removeItem('nd_resend');localStorage.removeItem('nd_sess')}catch(e){}
+(function(){const h=new URLSearchParams(location.hash.slice(1)),st=h.get('state');
+ if(h.get('access_token')){const t=h.get('access_token'),exp=Date.now()+((+h.get('expires_in')||3600)-60)*1000;
+  history.replaceState(null,'',location.pathname+location.search);
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+t}}).then(r=>r.json()).then(u=>{
+   const em=normE(u.email);if(!em)throw new Error('ইমেইল পাওয়া যায়নি');
+   if(!acl.admins.length){acl.admins.push(em);saveAcl();toast(em+' অ্যাডমিন হিসেবে সেট হয়েছে',5000)}
+   if(!approved(em)){if(!acl.pending.some(p=>p.e===em)){acl.pending.push({e:em,t:Date.now()});saveAcl()}
+    $('#acm').classList.remove('hide');renderAc('⛔ <b>'+esc(em)+'</b> এখনো অনুমোদিত নয়। নিচের “অনুরোধ কোড” কপি করে অ্যাডমিনকে পাঠান। অনুমোদনের পর অ্যাডমিনের দেওয়া অ্যাকসেস কোড ইমপোর্ট করে আবার লগইন করুন।');return}
+   let a=accts.find(x=>x.email===em);if(!a){a={email:em,sess:0};accts.push(a)}
+   a.name=u.name||em;a.pic=u.picture||'';a.tok=t;a.exp=exp;
+   if(st!=='s'||!(a.sess>Date.now()))a.sess=Date.now()+SESS;
+   active=em;saveAcc();updLgn();
+   toast(st==='s'?'লগইন নবায়ন হয়েছে ✓':'লগইন সফল ✓ — '+em+' (২৪ ঘণ্টা সক্রিয়)',3500);resendCheck()
+  }).catch(x=>toast('লগইন যাচাই ব্যর্থ: '+x.message,5000))}
+ else if(h.get('error')){try{localStorage.removeItem('nd_resend')}catch(e){}
+  const a=acc();if(st==='s'&&a){a.sess=0;saveAcc()}
   history.replaceState(null,'',location.pathname+location.search);updLgn();
   setTimeout(()=>toast('স্বয়ংক্রিয় লগইন হয়নি — উপরের 🔑 লগইন চাপুন',5000),400)}
 })();
 load();posts.length?open(posts.sort((a,b)=>b.t-a.t)[0].id):newPost();
-try{if(localStorage.getItem('nd_resend')&&tok&&Date.now()<tokExp){localStorage.removeItem('nd_resend');setTimeout(()=>$('#pubb').click(),1000)}}catch(e){}
+resendCheck();
 </script>
 </body>
 </html>
